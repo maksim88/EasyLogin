@@ -8,4 +8,4 @@ Currently supported:
 
 License
 --------
-Licensed under the MIT license. See [LICENSE](LICENSE.md).
+Licensed under the MIT license. See [LICENSE](LICENSE).
