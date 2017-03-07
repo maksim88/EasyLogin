@@ -105,7 +105,8 @@ gPlusButton.setOnClickListener(new View.OnClickListener() {
  For more information you can consult the [official docs](https://developers.google.com/identity/sign-in/android/start-integrating).
  
 Callbacks
- --------
+--------
+
 ```
  public class MainActivity extends AppCompatActivity implements OnLoginCompleteListener {
  
@@ -123,6 +124,30 @@ Callbacks
      Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
  }
 ```
+
+Download
+--------
+
+Just include `jitpack.io` inside of your root project `build.gradle`:
+
+```groovy
+allprojects {
+		repositories {
+			[...]
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+
+After that you can easily include the library in your app `build.gradle`:
+
+```groovy
+dependencies {
+	        compile 'com.github.maksim88:EasyLogin:v0.1'
+	}
+```
+
+The library will also be available through `jcenter()` soon.
         
 License
 --------
