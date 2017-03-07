@@ -11,6 +11,12 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
+
     buildTypes {
         applicationVariants.all { variant ->
             variant.buildConfigField "String", "TWITTER_CONSUMER_KEY", "\""+getApiKey("TWITTER_CONSUMER_SECRET")+"\""
@@ -25,7 +31,7 @@ android {
 
 static def getApiKey(def keyName){
     def Properties props = new Properties()
-    props.load(new FileInputStream(new File('secrets.properties')))
+    props.load(new FileInputStream(new File('sample/secrets.properties')))
     return props[keyName]
 }
 
@@ -35,4 +41,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support:design:25.2.0'
     compile project (":library")
+    //compile 'com.github.maksim88:EasyLogin:v0.2'
 }
