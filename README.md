@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/maksim88/EasyLogin.svg)](https://jitpack.io/#maksim88/EasyLogin)
+
 EasyLogin
 ============
 Easy Login in your app with different social networks.
@@ -143,7 +145,7 @@ After that you can easily include the library in your app `build.gradle`:
 
 ```groovy
 dependencies {
-	        compile 'com.github.maksim88:EasyLogin:v0.1'
+	        compile 'com.github.maksim88:EasyLogin:v0.2'
 	}
 ```
 
