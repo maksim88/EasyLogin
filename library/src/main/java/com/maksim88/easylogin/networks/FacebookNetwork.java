@@ -31,7 +31,10 @@ public class FacebookNetwork extends SocialNetwork {
 
         @Override
         public void onSuccess(LoginResult loginResult) {
-            mAccessToken = new com.maksim88.easylogin.AccessToken(loginResult.getAccessToken().getToken(), null);
+            String token = loginResult.getAccessToken().getToken();
+            String userId = loginResult.getAccessToken().getUserId();
+
+            mAccessToken = new com.maksim88.easylogin.AccessToken.Builder(token).userId(userId).build();
             if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
                 ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
                 mLocalListeners.remove(REQUEST_LOGIN);
@@ -41,7 +44,7 @@ public class FacebookNetwork extends SocialNetwork {
         @Override
         public void onCancel() {
             if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, null, null);
+                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, null);
                 mLocalListeners.remove(REQUEST_LOGIN);
             }
 
@@ -50,7 +53,7 @@ public class FacebookNetwork extends SocialNetwork {
         @Override
         public void onError(FacebookException error) {
             if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, error.getMessage(), null);
+                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, error.getMessage());
                 mLocalListeners.remove(REQUEST_LOGIN);
             }
         }
@@ -93,8 +96,9 @@ public class FacebookNetwork extends SocialNetwork {
 
     @Override
     public com.maksim88.easylogin.AccessToken getAccessToken() {
-        if(com.facebook.AccessToken.getCurrentAccessToken() != null) {
-            mAccessToken = new com.maksim88.easylogin.AccessToken(com.facebook.AccessToken.getCurrentAccessToken().getToken(), null);
+        if(com.facebook.AccessToken.getCurrentAccessToken() != null && mAccessToken == null) {
+            AccessToken facebookToken = AccessToken.getCurrentAccessToken();
+            mAccessToken = new com.maksim88.easylogin.AccessToken.Builder(facebookToken.getToken()).userId(facebookToken.getUserId()).build();
         }
         return mAccessToken;
     }

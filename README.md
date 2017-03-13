@@ -122,7 +122,7 @@ Callbacks
  }
  
  @Override
- public void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage, Object data) {
+ public void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage) {
      Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
  }
 ```

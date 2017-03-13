@@ -7,5 +7,5 @@ import com.maksim88.easylogin.networks.SocialNetwork;
  */
 public interface NetworkListener {
 
-    void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage, Object data);
+    void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage);
 }

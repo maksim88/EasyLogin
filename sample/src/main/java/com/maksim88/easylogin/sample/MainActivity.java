@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
     }
 
     @Override
-    public void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage, Object data) {
+    public void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage) {
         Log.e("MAIN", "ERROR!" + socialNetwork + "|||" + errorMessage);
         Toast.makeText(getApplicationContext(), errorMessage,
                 Toast.LENGTH_SHORT).show();

@@ -88,7 +88,11 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             if (acct != null) {
-                mAccessToken = new AccessToken(acct.getId(), null);
+                mAccessToken = new AccessToken.Builder(acct.getId())
+                        .email(acct.getEmail())
+                        .userName(acct.getDisplayName())
+                        .userId(acct.getId())
+                        .build();
                 if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
                     ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
                     mLocalListeners.remove(REQUEST_LOGIN);
@@ -97,7 +101,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
         } else {
             // Signed out, show unauthenticated UI.
             if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN,  result.getStatus().getStatusMessage(), null);
+                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN,  result.getStatus().getStatusMessage());
                 mLocalListeners.remove(REQUEST_LOGIN);
             }
         }
@@ -114,7 +118,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
     @Override
     public void onConnectionSuspended(int i) {
         if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-            mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, null, null);
+            mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, null);
             mLocalListeners.remove(REQUEST_LOGIN);
         }
     }
@@ -122,7 +126,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-            mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, connectionResult.getErrorMessage(), null);
+            mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, connectionResult.getErrorMessage());
             mLocalListeners.remove(REQUEST_LOGIN);
         }
     }

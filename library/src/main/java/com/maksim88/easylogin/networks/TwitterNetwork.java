@@ -7,6 +7,7 @@ import android.os.Build;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
+import com.maksim88.easylogin.AccessToken;
 import com.maksim88.easylogin.listener.OnLoginCompleteListener;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
@@ -39,7 +40,11 @@ public class TwitterNetwork extends SocialNetwork {
             TwitterAuthToken authToken = session.getAuthToken();
             String token = authToken.token;
             String secret = authToken.secret;
-            mAccessToken = new com.maksim88.easylogin.AccessToken(token, secret);
+            mAccessToken = new AccessToken.Builder(token)
+                    .secret(secret)
+                    .userName(session.getUserName())
+                    .userId(String.valueOf(session.getUserId()))
+                    .build();
             if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
                 ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
                 mLocalListeners.remove(REQUEST_LOGIN);
@@ -49,7 +54,7 @@ public class TwitterNetwork extends SocialNetwork {
         @Override
         public void failure(TwitterException e) {
             if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, e.getMessage(), null);
+                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, e.getMessage());
                 mLocalListeners.remove(REQUEST_LOGIN);
             }
         }
