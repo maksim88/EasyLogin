@@ -19,7 +19,7 @@ android {
 
     buildTypes {
         applicationVariants.all { variant ->
-            variant.buildConfigField "String", "TWITTER_CONSUMER_KEY", "\""+getApiKey("TWITTER_CONSUMER_SECRET")+"\""
+            variant.buildConfigField "String", "TWITTER_CONSUMER_KEY", "\""+getApiKey("TWITTER_CONSUMER_KEY")+"\""
             variant.buildConfigField "String", "TWITTER_CONSUMER_SECRET", "\""+getApiKey("TWITTER_CONSUMER_SECRET")+"\""
         }
         release {
