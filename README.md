@@ -1,4 +1,5 @@
 [![](https://jitpack.io/v/maksim88/EasyLogin.svg)](https://jitpack.io/#maksim88/EasyLogin)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-EasyLogin-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/5423)
 
 EasyLogin
 ============
@@ -137,6 +138,7 @@ allprojects {
 		repositories {
 			[...]
 			maven { url 'https://jitpack.io' }
+			maven { url 'https://maven.fabric.io/public' } //currently needed for the twitter lib
 		}
 	}
 ```
@@ -145,7 +147,7 @@ After that you can easily include the library in your app `build.gradle`:
 
 ```groovy
 dependencies {
-	        compile 'com.github.maksim88:EasyLogin:v0.2'
+	        compile 'com.github.maksim88:EasyLogin:v0.3'
 	}
 ```
 
