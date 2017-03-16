@@ -45,6 +45,12 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
 
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        updateStatuses();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EasyLogin.initialize();
@@ -94,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
             public void onClick(View v) {
                 if (!gPlusNetwork.isConnected()) {
                     gPlusNetwork.requestLogin(MainActivity.this);
+                } else {
+                    gPlusNetwork.setLocalOnCompleteListener(MainActivity.this);
+                    gPlusNetwork.silentSignIn();
                 }
             }
         });

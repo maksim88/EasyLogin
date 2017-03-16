@@ -43,9 +43,6 @@ public abstract class SocialNetwork {
      * @param onLoginCompleteListener listener for login complete
      */
     public void requestLogin(OnLoginCompleteListener onLoginCompleteListener) {
-        if (isConnected()) {
-            throw new RuntimeException("Already connected, please check isConnected() method");
-        }
         registerListener(REQUEST_LOGIN, onLoginCompleteListener);
     }
 
@@ -68,6 +65,10 @@ public abstract class SocialNetwork {
 
     public void setOnLoginCompleteListener(OnLoginCompleteListener onLoginCompleteListener) {
         mGlobalListeners.put(REQUEST_LOGIN, onLoginCompleteListener);
+    }
+
+    public void setLocalOnCompleteListener(OnLoginCompleteListener onLoginCompleteListener) {
+        mLocalListeners.put(REQUEST_LOGIN, onLoginCompleteListener);
     }
 
     public abstract void onActivityResult(int requestCode, int resultCode, Intent data);

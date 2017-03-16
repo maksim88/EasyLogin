@@ -131,13 +131,14 @@ Callbacks
 Download
 --------
 
-Just include `jitpack.io` inside of your root project `build.gradle`:
+The library is available through `jcenter()`.
+
+For now you have to include the fabric repo in your root projects `build.gradle`:
 
 ```groovy
 allprojects {
 		repositories {
 			[...]
-			maven { url 'https://jitpack.io' }
 			maven { url 'https://maven.fabric.io/public' } //currently needed for the twitter lib
 		}
 	}
@@ -147,11 +148,11 @@ After that you can easily include the library in your app `build.gradle`:
 
 ```groovy
 dependencies {
-	        compile 'com.github.maksim88:EasyLogin:v0.3'
+	        compile 'com.maksim88:EasyLogin:v0.3'
 	}
 ```
 
-The library will also be available through `jcenter()` soon.
+The builds are also available via `jitpack.io`.
         
 License
 --------

@@ -1,5 +1,12 @@
 apply plugin: 'com.android.library'
 
+//usage: gradle clean build generateRelease
+ext {
+    PUBLISH_GROUP_ID = 'com.maksim88'
+    PUBLISH_ARTIFACT_ID = 'EasyLogin'
+    PUBLISH_VERSION = 'v0.3'
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -37,5 +44,7 @@ dependencies {
         transitive = true;
     }
 }
+
+apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'
 
 apply plugin: 'com.google.gms.google-services'
