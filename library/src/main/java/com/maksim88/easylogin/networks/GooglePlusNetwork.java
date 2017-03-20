@@ -1,16 +1,21 @@
 package com.maksim88.easylogin.networks;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
@@ -25,25 +30,32 @@ import java.lang.ref.WeakReference;
  */
 public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    private static final String GPLUS_CONNECTED = "google_plus_connected";
+
     private GoogleApiClient mGoogleApiClient;
 
     private AccessToken mAccessToken;
 
+    private SharedPreferences mSharedPrefs;
+
     private static final int REQUEST_AUTH = 1337;
 
-    private WeakReference<Context> mContext;
+    private WeakReference<Activity> mActivity;
 
+    private WeakReference<SignInButton> mSignInButton;
 
-    public GooglePlusNetwork(Context context) {
+    public GooglePlusNetwork(Activity activity) {
 
-        mContext = new WeakReference<>(context);
+        mSharedPrefs = activity.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+
+        mActivity = new WeakReference<>(activity);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
 
-        GoogleApiClient.Builder googleApiBuilder = new GoogleApiClient.Builder(context);
-        if (context instanceof FragmentActivity) {
-            googleApiBuilder.enableAutoManage((FragmentActivity) context, this);
+        GoogleApiClient.Builder googleApiBuilder = new GoogleApiClient.Builder(activity);
+        if (activity instanceof FragmentActivity) {
+            googleApiBuilder.enableAutoManage((FragmentActivity) activity, this);
         } else {
             googleApiBuilder
                     .addConnectionCallbacks(this)
@@ -56,7 +68,8 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
 
     @Override
     public boolean isConnected() {
-       return mGoogleApiClient.isConnected();
+        // GoogleApiClient behaves weirdly with isConnected(), so let's save our own state
+        return mSharedPrefs.getBoolean(GPLUS_CONNECTED, false);
     }
 
     public void silentSignIn() {
@@ -80,7 +93,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
      * The easier approach is to pass a FragmentActivity in the Network and let GoogleApiClient manage itself.
      */
     public void connectGoogleApiClient() {
-            mGoogleApiClient.connect();
+        mGoogleApiClient.connect();
     }
 
     /**
@@ -88,13 +101,16 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
      * The easier approach is to pass a FragmentActivity in the Network and let GoogleApiClient manage itself.
      */
     public void disconnectGoogleApiClient() {
-            mGoogleApiClient.disconnect();
+        mGoogleApiClient.disconnect();
     }
+
     @Override
     public void logout() {
         if (isConnected()) {
             Auth.GoogleSignInApi.signOut(mGoogleApiClient);
             mGoogleApiClient.disconnect();
+            setSignInButtonEnabled(true);
+            mSharedPrefs.edit().putBoolean(GPLUS_CONNECTED, false).apply();
         }
     }
 
@@ -103,6 +119,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
         return Network.GOOGLE_PLUS;
     }
 
+    @Nullable
     @Override
     public AccessToken getAccessToken() {
         return mAccessToken;
@@ -111,15 +128,14 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
 
     /**
      * Make login request - authorize in Google plus social network
+     *
      * @param onLoginCompleteListener listener for login complete
      */
     @Override
     public void requestLogin(OnLoginCompleteListener onLoginCompleteListener) {
-        super.requestLogin(onLoginCompleteListener);
+        setListener(onLoginCompleteListener);
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        if (mContext.get() instanceof FragmentActivity) {
-            ((FragmentActivity) mContext.get()).startActivityForResult(signInIntent, REQUEST_AUTH);
-        }
+         mActivity.get().startActivityForResult(signInIntent, REQUEST_AUTH);
     }
 
     @Override
@@ -132,26 +148,37 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
 
     @Override
     public void onConnected(Bundle bundle) {
-        if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-            ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
-            mLocalListeners.remove(REQUEST_LOGIN);
-        }
+        mSharedPrefs.edit().putBoolean(GPLUS_CONNECTED, true).apply();
+        setSignInButtonEnabled(false);
+        mListener.onLoginSuccess(getNetwork());
     }
 
     @Override
     public void onConnectionSuspended(int cause) {
-        if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-            mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, getStatusCodeString(cause));
-            mLocalListeners.remove(REQUEST_LOGIN);
-        }
+        mSharedPrefs.edit().putBoolean(GPLUS_CONNECTED, false).apply();
+        setSignInButtonEnabled(true);
+        mListener.onError(getNetwork(), getStatusCodeString(cause));
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-            mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, getStatusCodeString(connectionResult.getErrorCode()));
-            mLocalListeners.remove(REQUEST_LOGIN);
-        }
+        mSharedPrefs.edit().putBoolean(GPLUS_CONNECTED, false).apply();
+        setSignInButtonEnabled(true);
+        mListener.onError(getNetwork(), getStatusCodeString(connectionResult.getErrorCode()));
+    }
+
+    public void setSignInButton(SignInButton button) {
+        mSignInButton = new WeakReference<>(button);
+        mSignInButton.get().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isConnected()) {
+                    requestLogin(mListener);
+                } else {
+                    silentSignIn();
+                }
+            }
+        });
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
@@ -160,28 +187,28 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
 
     private void parseGoogleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
+            mSharedPrefs.edit().putBoolean(GPLUS_CONNECTED, true).apply();
+            setSignInButtonEnabled(false);
             GoogleSignInAccount acct = result.getSignInAccount();
+
             if (acct != null) {
                 mAccessToken = new AccessToken.Builder(acct.getId())
                         .email(acct.getEmail())
                         .userName(acct.getDisplayName())
                         .userId(acct.getId())
                         .build();
-                if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                    ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
-                    mLocalListeners.remove(REQUEST_LOGIN);
-                }
+                mListener.onLoginSuccess(getNetwork());
             }
         } else {
             if (result.getStatus().getStatusCode() == CommonStatusCodes.SIGN_IN_REQUIRED) {
-                requestLogin();
+                if (mListener != null) {
+                    requestLogin(mListener);
+                }
                 return;
             }
-            // Signed out, show unauthenticated UI.
-            if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, getStatusCodeString(result.getStatus().getStatusCode()));
-                mLocalListeners.remove(REQUEST_LOGIN);
-            }
+            mSharedPrefs.edit().putBoolean(GPLUS_CONNECTED, false).apply();
+            setSignInButtonEnabled(true);
+            mListener.onError(getNetwork(), getStatusCodeString(result.getStatus().getStatusCode()));
         }
     }
 
@@ -189,4 +216,9 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
         return CommonStatusCodes.getStatusCodeString(statusCode);
     }
 
+    private void setSignInButtonEnabled(boolean enabled) {
+        if (mSignInButton != null && mSignInButton.get() != null) {
+            mSignInButton.get().setEnabled(enabled);
+        }
+    }
 }

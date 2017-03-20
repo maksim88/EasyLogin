@@ -1,5 +1,6 @@
-[![](https://jitpack.io/v/maksim88/EasyLogin.svg)](https://jitpack.io/#maksim88/EasyLogin)
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-EasyLogin-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/5423)
+[![jCenter](https://api.bintray.com/packages/maksim88/EasyLogin/EasyLogin/images/download.svg) ](https://bintray.com/maksim88/EasyLogin/EasyLogin/_latestVersion)
+[![](https://jitpack.io/v/maksim88/EasyLogin.svg)](https://jitpack.io/#maksim88/EasyLogin)
 
 EasyLogin
 ============
@@ -46,16 +47,10 @@ To connect to facebook you need to do the following:
      ```
     facebook = (FacebookNetwork) mEasyLogin.getSocialNetwork(SocialNetwork.Network.FACEBOOK);
     
-    // Use global listener to get notified in onSuccess() or onError() inside Activity
-    facebook.setOnLoginCompleteListener(this);
-    
     LoginButton loginButton = (LoginButton) findViewById(R.id.facebook_login_button);
     // Call this method if you are using the LoginButton provided by facebook
     // It can handle its own state
-    if (!facebook.isConnected()) {
-        // You can also use a local listener per every social login
-        facebook.requestLogin(loginButton, this);
-    }
+    facebook.requestLogin(loginButton, this);
      ```
 - In the next step you will get an  `onSuccess()` or  `onError()` callback. The easiest solution is to implement the `OnLoginCompleteListener`in your activity and handle all the connections there.
 
@@ -75,7 +70,6 @@ easyLogin.addSocialNetwork(new TwitterNetwork(this, twitterKey, twitterSecret));
 setContentView(R.layout.activity_main);
 
 twitter = (TwitterNetwork) easyLogin.getSocialNetwork(SocialNetwork.Network.TWITTER);
-twitter.setOnLoginCompleteListener(this);
 twitterButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
 twitter.requestLogin(twitterButton, this);
 ```
@@ -91,7 +85,6 @@ Google Plus Connection
 ```
 easyLogin.addSocialNetwork(new GooglePlusNetwork(this));
 gPlusNetwork = (GooglePlusNetwork) easyLogin.getSocialNetwork(SocialNetwork.Network.GOOGLE_PLUS);
-gPlusNetwork.setOnLoginCompleteListener(this);
 
 gPlusButton = (SignInButton) findViewById(R.id.gplus_sign_in_button);
 gPlusButton.setOnClickListener(new View.OnClickListener() {
@@ -103,6 +96,11 @@ gPlusButton.setOnClickListener(new View.OnClickListener() {
     }
 });
 ```
+
+You can pass a reference to the `SignInButton` to the SocialNetwork by calling `gPlusNetwork.setSignInButton(gPlusButton);`. This will make sure to disable and enable the button on connection state changes. Unfortunately the state is not handled automatically inside the Button like the facebook button does. 
+
+As the state is not handled by the SignInButton you may need to call `silentSignIn()` in your `onStart()` to be logged in again. You will get a callback. For more info check the `sample` project.
+If you call `silentSignIn()` make sure to set a listener before.
  
  You also need to include a valid `google-services.json` file in your project to be able to use G+:
  For more information you can consult the [official docs](https://developers.google.com/identity/sign-in/android/start-integrating).
@@ -123,7 +121,7 @@ Callbacks
  }
  
  @Override
- public void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage) {
+ public void onError(SocialNetwork.Network socialNetwork, String errorMessage) {
      Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_SHORT).show();
  }
 ```

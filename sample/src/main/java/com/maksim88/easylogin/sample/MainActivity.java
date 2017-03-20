@@ -45,17 +45,10 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
 
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        updateStatuses();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EasyLogin.initialize();
         mEasyLogin = EasyLogin.getInstance();
-
 
         // TWITTER
 
@@ -67,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
         setContentView(R.layout.activity_main);
 
         twitter = (TwitterNetwork) mEasyLogin.getSocialNetwork(SocialNetwork.Network.TWITTER);
-        twitter.setOnLoginCompleteListener(this);
         twitterButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
         twitter.requestLogin(twitterButton, this);
 
@@ -79,41 +71,44 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
         mEasyLogin.addSocialNetwork(new FacebookNetwork(this, fbScope));
 
         facebook = (FacebookNetwork) mEasyLogin.getSocialNetwork(SocialNetwork.Network.FACEBOOK);
-        facebook.setOnLoginCompleteListener(this);
         loginButton = (LoginButton) findViewById(R.id.facebook_login_button);
-        // Call this method if you are using the LoginButton provided by facebook
-        // It can handle its own state
-        if (!facebook.isConnected()) {
-            facebook.requestLogin(loginButton, this);
-        }
+        facebook.requestLogin(loginButton, this);
         // FACEBOOK END
 
         // G+
 
         mEasyLogin.addSocialNetwork(new GooglePlusNetwork(this));
         gPlusNetwork = (GooglePlusNetwork) mEasyLogin.getSocialNetwork(SocialNetwork.Network.GOOGLE_PLUS);
-        gPlusNetwork.setOnLoginCompleteListener(this);
+        gPlusNetwork.setListener(this);
 
         gPlusButton = (SignInButton) findViewById(R.id.gplus_sign_in_button);
-        gPlusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!gPlusNetwork.isConnected()) {
-                    gPlusNetwork.requestLogin(MainActivity.this);
-                } else {
-                    gPlusNetwork.setLocalOnCompleteListener(MainActivity.this);
-                    gPlusNetwork.silentSignIn();
-                }
-            }
-        });
+
+        gPlusNetwork.setSignInButton(gPlusButton);
+
 
         // G+ END
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         statusTextView = (TextView) findViewById(R.id.connected_status);
         setSupportActionBar(toolbar);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!gPlusNetwork.isConnected()) {
+            gPlusNetwork.silentSignIn();
+        } else {
+            gPlusButton.setEnabled(false);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         updateStatuses();
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -126,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
         if (network == SocialNetwork.Network.GOOGLE_PLUS) {
             AccessToken token = mEasyLogin.getSocialNetwork(SocialNetwork.Network.GOOGLE_PLUS).getAccessToken();
             Log.d("MAIN", "G+ Login successful: " + token.getToken());
+            gPlusButton.setEnabled(false);
         } else if (network == SocialNetwork.Network.FACEBOOK) {
             AccessToken token = mEasyLogin.getSocialNetwork(SocialNetwork.Network.FACEBOOK).getAccessToken();
             Log.d("MAIN", "FACEBOOK Login successful: " + token.getToken());
@@ -137,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
     }
 
     @Override
-    public void onError(SocialNetwork.Network socialNetwork, String requestID, String errorMessage) {
+    public void onError(SocialNetwork.Network socialNetwork, String errorMessage) {
         Log.e("MAIN", "ERROR!" + socialNetwork + "|||" + errorMessage);
         Toast.makeText(getApplicationContext(), errorMessage,
                 Toast.LENGTH_SHORT).show();
@@ -152,5 +148,12 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
                     .append("\n");
         }
         statusTextView.setText(content.toString());
+    }
+
+    public void logoutAllNetworks(View view) {
+        for (SocialNetwork socialNetwork : mEasyLogin.getInitializedSocialNetworks()) {
+            socialNetwork.logout();
+        }
+        updateStatuses();
     }
 }

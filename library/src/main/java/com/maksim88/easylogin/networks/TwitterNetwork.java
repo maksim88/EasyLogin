@@ -19,6 +19,8 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
+import java.lang.ref.WeakReference;
+
 import io.fabric.sdk.android.Fabric;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
@@ -30,7 +32,7 @@ public class TwitterNetwork extends SocialNetwork {
 
     private com.maksim88.easylogin.AccessToken mAccessToken;
 
-    private TwitterLoginButton mLoginButton;
+    private WeakReference<TwitterLoginButton> mLoginButton;
 
     private Callback<TwitterSession> mButtonCallback = new Callback<TwitterSession>() {
 
@@ -45,18 +47,14 @@ public class TwitterNetwork extends SocialNetwork {
                     .userName(session.getUserName())
                     .userId(String.valueOf(session.getUserId()))
                     .build();
-            if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
-                mLocalListeners.remove(REQUEST_LOGIN);
-            }
+            mLoginButton.get().setEnabled(false);
+            mListener.onLoginSuccess(getNetwork());
         }
 
         @Override
         public void failure(TwitterException e) {
-            if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, e.getMessage());
-                mLocalListeners.remove(REQUEST_LOGIN);
-            }
+            mLoginButton.get().setEnabled(true);
+            mListener.onError(getNetwork(), e.getMessage());
         }
     };
 
@@ -67,7 +65,7 @@ public class TwitterNetwork extends SocialNetwork {
 
     @Override
     public boolean isConnected() {
-       return TwitterCore.getInstance().getSessionManager().getActiveSession() != null;
+        return TwitterCore.getInstance().getSessionManager().getActiveSession() != null;
     }
 
     @Override
@@ -76,13 +74,13 @@ public class TwitterNetwork extends SocialNetwork {
     }
 
     public void requestLogin(TwitterLoginButton button, OnLoginCompleteListener onLoginCompleteListener) {
-        super.requestLogin(onLoginCompleteListener);
+        setListener(onLoginCompleteListener);
         requestLogin(button);
     }
 
     private void requestLogin(TwitterLoginButton button) {
-        mLoginButton = button;
-        mLoginButton.setCallback(mButtonCallback);
+        mLoginButton = new WeakReference<>(button);
+        mLoginButton.get().setCallback(mButtonCallback);
     }
 
 
@@ -93,6 +91,7 @@ public class TwitterNetwork extends SocialNetwork {
             clearCookies(getApplicationContext());
             Twitter.getSessionManager().clearActiveSession();
             Twitter.logOut();
+            mLoginButton.get().setEnabled(true);
         }
     }
 
@@ -108,8 +107,8 @@ public class TwitterNetwork extends SocialNetwork {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (mLoginButton != null) {
-            mLoginButton.onActivityResult(requestCode, resultCode, data);
+        if (mLoginButton != null && mLoginButton.get() != null) {
+            mLoginButton.get().onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -121,7 +120,7 @@ public class TwitterNetwork extends SocialNetwork {
         } else {
             CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(context);
             cookieSyncMngr.startSync();
-            CookieManager cookieManager=CookieManager.getInstance();
+            CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.removeAllCookie();
             cookieManager.removeSessionCookie();
             cookieSyncMngr.stopSync();
