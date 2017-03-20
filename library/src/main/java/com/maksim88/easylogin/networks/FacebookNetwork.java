@@ -22,12 +22,14 @@ import java.util.List;
 public class FacebookNetwork extends SocialNetwork {
 
     private WeakReference<Activity> mActivity;
+
     private CallbackManager mCallbackManager;
+
     private List<String> mPermissions;
 
     private com.maksim88.easylogin.AccessToken mAccessToken;
 
-    private FacebookCallback<LoginResult> LoginCallback = new FacebookCallback<LoginResult>() {
+    private FacebookCallback<LoginResult> mLoginCallback = new FacebookCallback<LoginResult>() {
 
         @Override
         public void onSuccess(LoginResult loginResult) {
@@ -35,27 +37,17 @@ public class FacebookNetwork extends SocialNetwork {
             String userId = loginResult.getAccessToken().getUserId();
 
             mAccessToken = new com.maksim88.easylogin.AccessToken.Builder(token).userId(userId).build();
-            if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                ((OnLoginCompleteListener) mLocalListeners.get(REQUEST_LOGIN)).onLoginSuccess(getNetwork());
-                mLocalListeners.remove(REQUEST_LOGIN);
-            }
+            mListener.onLoginSuccess(getNetwork());
         }
 
         @Override
         public void onCancel() {
-            if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, null);
-                mLocalListeners.remove(REQUEST_LOGIN);
-            }
-
+            mListener.onError(getNetwork(), null);
         }
 
         @Override
         public void onError(FacebookException error) {
-            if (mLocalListeners.containsKey(REQUEST_LOGIN)) {
-                mLocalListeners.get(REQUEST_LOGIN).onError(getNetwork(), REQUEST_LOGIN, error.getMessage());
-                mLocalListeners.remove(REQUEST_LOGIN);
-            }
+            mListener.onError(getNetwork(), error.getMessage());
         }
     };
 
@@ -78,15 +70,15 @@ public class FacebookNetwork extends SocialNetwork {
 
     @Override
     public void requestLogin(OnLoginCompleteListener onLoginCompleteListener) {
-        super.requestLogin(onLoginCompleteListener);
+        setListener(onLoginCompleteListener);
         LoginManager.getInstance().logInWithReadPermissions(mActivity.get(), mPermissions);
-        LoginManager.getInstance().registerCallback(mCallbackManager, LoginCallback);
+        LoginManager.getInstance().registerCallback(mCallbackManager, mLoginCallback);
     }
 
     public void requestLogin(LoginButton button, OnLoginCompleteListener onLoginCompleteListener) {
-        super.requestLogin(onLoginCompleteListener);
+        setListener(onLoginCompleteListener);
         button.setReadPermissions(mPermissions);
-        button.registerCallback(mCallbackManager, LoginCallback);
+        button.registerCallback(mCallbackManager, mLoginCallback);
     }
 
     @Override
@@ -96,7 +88,7 @@ public class FacebookNetwork extends SocialNetwork {
 
     @Override
     public com.maksim88.easylogin.AccessToken getAccessToken() {
-        if(com.facebook.AccessToken.getCurrentAccessToken() != null && mAccessToken == null) {
+        if (com.facebook.AccessToken.getCurrentAccessToken() != null && mAccessToken == null) {
             AccessToken facebookToken = AccessToken.getCurrentAccessToken();
             mAccessToken = new com.maksim88.easylogin.AccessToken.Builder(facebookToken.getToken()).userId(facebookToken.getUserId()).build();
         }
