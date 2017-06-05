@@ -1,29 +1,24 @@
 package com.maksim88.easylogin.networks;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
+import android.util.Log;
 
 import com.maksim88.easylogin.AccessToken;
 import com.maksim88.easylogin.listener.OnLoginCompleteListener;
-import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.DefaultLogger;
 import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterAuthToken;
+import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
 import java.lang.ref.WeakReference;
-
-import io.fabric.sdk.android.Fabric;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by maksim on 14.02.16.
@@ -60,7 +55,11 @@ public class TwitterNetwork extends SocialNetwork {
 
     public TwitterNetwork(Activity activity, String consumerKey, String consumerSecret) {
         TwitterAuthConfig authConfig = new TwitterAuthConfig(consumerKey, consumerSecret);
-        Fabric.with(activity, new Twitter(authConfig));
+        TwitterConfig config = new TwitterConfig.Builder(activity.getApplicationContext())
+                .logger(new DefaultLogger(Log.DEBUG))
+                .twitterAuthConfig(authConfig)
+                .build();
+        Twitter.initialize(config);
     }
 
     @Override
@@ -88,9 +87,7 @@ public class TwitterNetwork extends SocialNetwork {
     public void logout() {
         TwitterSession twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         if (twitterSession != null) {
-            clearCookies(getApplicationContext());
-            Twitter.getSessionManager().clearActiveSession();
-            Twitter.logOut();
+            TwitterCore.getInstance().getSessionManager().clearActiveSession();
             mLoginButton.get().setEnabled(true);
         }
     }
@@ -109,22 +106,6 @@ public class TwitterNetwork extends SocialNetwork {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (mLoginButton != null && mLoginButton.get() != null) {
             mLoginButton.get().onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private void clearCookies(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            CookieManager.getInstance().removeAllCookies(null);
-            CookieManager.getInstance().flush();
-        } else {
-            CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(context);
-            cookieSyncMngr.startSync();
-            CookieManager cookieManager = CookieManager.getInstance();
-            cookieManager.removeAllCookie();
-            cookieManager.removeSessionCookie();
-            cookieSyncMngr.stopSync();
-            cookieSyncMngr.sync();
         }
     }
 }

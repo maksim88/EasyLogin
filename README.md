@@ -74,11 +74,6 @@ twitterButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
 twitter.requestLogin(twitterButton, this);
 ```
 
-You also need to make sure to add the Fabric API Key your manifest:
-```
- <meta-data android:name="io.fabric.ApiKey" android:value="@string/fabric_app_id"/>
-```
-
 Google Plus Connection
 --------
 

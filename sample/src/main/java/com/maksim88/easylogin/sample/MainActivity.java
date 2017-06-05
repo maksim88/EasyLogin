@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
 
     private SignInButton gPlusButton;
 
-    private TwitterLoginButton  twitterButton;
+    private TwitterLoginButton twitterButton;
 
     FacebookNetwork facebook;
 
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
     @Override
     public void onError(SocialNetwork.Network socialNetwork, String errorMessage) {
         Log.e("MAIN", "ERROR!" + socialNetwork + "|||" + errorMessage);
-        Toast.makeText(getApplicationContext(), errorMessage,
+        Toast.makeText(getApplicationContext(), socialNetwork.name() + ": " + errorMessage,
                 Toast.LENGTH_SHORT).show();
     }
 

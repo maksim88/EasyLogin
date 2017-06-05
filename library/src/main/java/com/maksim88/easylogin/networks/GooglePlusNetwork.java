@@ -15,7 +15,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
@@ -42,7 +41,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
 
     private WeakReference<Activity> mActivity;
 
-    private WeakReference<SignInButton> mSignInButton;
+    private WeakReference<View> mSignInButton;
 
     public GooglePlusNetwork(Activity activity) {
 
@@ -167,7 +166,7 @@ public class GooglePlusNetwork extends SocialNetwork implements GoogleApiClient.
         mListener.onError(getNetwork(), getStatusCodeString(connectionResult.getErrorCode()));
     }
 
-    public void setSignInButton(SignInButton button) {
+    public void setSignInButton(View button) {
         mSignInButton = new WeakReference<>(button);
         mSignInButton.get().setOnClickListener(new View.OnClickListener() {
             @Override
