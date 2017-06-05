@@ -126,17 +126,6 @@ Download
 
 The library is available through `jcenter()`.
 
-For now you have to include the fabric repo in your root projects `build.gradle`:
-
-```groovy
-allprojects {
-		repositories {
-			[...]
-			maven { url 'https://maven.fabric.io/public' } //currently needed for the twitter lib
-		}
-	}
-```
-
 After that you can easily include the library in your app `build.gradle`:
 
 ```groovy
