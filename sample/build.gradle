@@ -38,8 +38,8 @@ static def getApiKey(def keyName){
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'com.android.support:design:25.2.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
     compile project (":library")
-    //compile 'com.maksim88:EasyLogin:v0.3'
+    //compile 'com.maksim88:EasyLogin:v0.5'
 }
