@@ -1,10 +1,13 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
-//usage: gradle clean build generateRelease
-ext {
-    PUBLISH_GROUP_ID = 'com.maksim88'
-    PUBLISH_ARTIFACT_ID = 'EasyLogin'
-    PUBLISH_VERSION = 'v0.5'
+// usage: ./gradlew clean build bintrayUpload -PbintrayUser=BINTRAY_USERNAME -PbintrayKey=BINTRAY_KEY -PdryRun=false
+publish {
+    userOrg = 'maksim88'
+    groupId = 'com.maksim88'
+    artifactId = 'EasyLogin'
+    publishVersion = 'v0.5'
+    website = 'https://github.com/maksim88/EasyLogin'
 }
 
 android {
@@ -19,7 +22,7 @@ android {
     }
 
     lintOptions {
-        disable 'InvalidPackage'
+        disable 'InvalidPackage', 'GoogleAppIndexingWarning'
     }
 
 
@@ -41,7 +44,5 @@ dependencies {
         transitive = true;
     }
 }
-
-apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'
 
 apply plugin: 'com.google.gms.google-services'

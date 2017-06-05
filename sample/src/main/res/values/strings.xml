@@ -1,5 +1,4 @@
 <resources>
     <string name="app_name">EasyLogin Sample</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="facebook_app_id">TO BE CHANGED</string>
 </resources>

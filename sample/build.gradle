@@ -13,7 +13,7 @@ android {
     }
 
     lintOptions {
-        disable 'InvalidPackage'
+        disable 'InvalidPackage', 'GoogleAppIndexingWarning'
     }
 
 
