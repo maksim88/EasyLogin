@@ -85,12 +85,11 @@ public class MainActivity extends AppCompatActivity implements OnLoginCompleteLi
     @Override
     protected void onStart() {
         super.onStart();
-        //TODO
-//        if (!gPlusNetwork.isConnected()) {
-//            gPlusNetwork.silentSignIn();
-//        } else {
-//            gPlusButton.setEnabled(false);
-//        }
+        if (!gPlusNetwork.isConnected()) {
+            gPlusNetwork.silentSignIn();
+        } else {
+            gPlusButton.setEnabled(false);
+        }
     }
 
     @Override
