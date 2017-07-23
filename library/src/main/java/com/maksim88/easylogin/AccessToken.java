@@ -5,73 +5,77 @@ package com.maksim88.easylogin;
  */
 public class AccessToken {
 
-    private final String mToken;
-    private final String mSecret;
-    private final String mEmail;
-    private final String mUserName;
-    private final String mUserId;
+    private final String token;
+    private final String secret;
+    private final String email;
+    private final String userName;
+    private final String userId;
 
     private AccessToken(Builder builder) {
-        mToken = builder.mToken;
-        mSecret = builder.mSecret;
-        mEmail = builder.mEmail;
-        mUserName = builder.mUserName;
-        mUserId = builder.mUserId;
+        token = builder.token;
+        secret = builder.secret;
+        email = builder.email;
+        userName = builder.userName;
+        userId = builder.userId;
     }
 
     public String getToken() {
-        return mToken;
+        return token;
     }
 
     public String getSecret() {
-        return mSecret;
+        return secret;
     }
 
     public String getEmail() {
-        return mEmail;
+        return email;
     }
 
     public String getUserName() {
-        return mUserName;
+        return userName;
     }
 
     public String getUserId() {
-        return mUserId;
+        return userId;
     }
 
     public static class Builder {
 
-        private final String mToken;
-
-        private String mSecret;
-
-        private String mUserName;
-
-        private String mEmail;
-
-        private String mUserId;
+        private final String token;
+        private String secret;
+        private String userName;
+        private String email;
+        private String userId;
 
         public Builder(String token) {
-            mToken = token;
+            this.token = token;
+        }
+
+        public Builder(AccessToken oldToken) {
+            token = oldToken.token;
+            secret = oldToken.secret;
+            email = oldToken.email;
+            userName = oldToken.userName;
+            userId = oldToken.userId;
         }
 
         public Builder secret(String secret) {
-            mSecret = secret;
+            this.secret = secret;
             return this;
         }
 
         public Builder userName(String userName) {
-            mUserName = userName;
+            this.userName = userName;
             return this;
         }
 
         public Builder userId(String userId) {
-            mUserId = userId;
+            this.userId = userId;
             return this;
         }
 
         public Builder email(String email) {
-            mEmail = email;
+            this.email = email;
             return this;
         }
 

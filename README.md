@@ -36,8 +36,7 @@ Facebook Connection
 To connect to facebook you need to do the following:
 - First of all you need to init a list of permissions you want to take:
     ```
-    List<String> fbScope = new ArrayList<>();
-    fbScope.addAll(Collections.singletonList("public_profile, email"));
+    List<String> fbScope = Arrays.asList("public_profile", "email");
     ```
 - Add the facebook social network:
     ```
@@ -45,7 +44,7 @@ To connect to facebook you need to do the following:
     ```
 - Add the Facebook LoginButton and the listeners:
      ```
-    facebook = (FacebookNetwork) mEasyLogin.getSocialNetwork(SocialNetwork.Network.FACEBOOK);
+    facebook = (FacebookNetwork) easyLogin.getSocialNetwork(SocialNetwork.Network.FACEBOOK);
     
     LoginButton loginButton = (LoginButton) findViewById(R.id.facebook_login_button);
     // Call this method if you are using the LoginButton provided by facebook
@@ -58,6 +57,10 @@ You also need to make sure to add the Facebook ApplicationId in your manifest:
 ```
 <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
 ```
+
+If an `email` permission is requested, the library also does a `/me` request on the facebook graph api to try to fetch the email. 
+
+Note that it is still not guaranteed that you will get an email because the user might not have a valid / verified email or signed up with a telephone number. So I would advise to use the `userId` for figuring out the user identity.
 
 Twitter Connection
 --------
@@ -73,6 +76,11 @@ twitter = (TwitterNetwork) easyLogin.getSocialNetwork(SocialNetwork.Network.TWIT
 twitterButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
 twitter.requestLogin(twitterButton, this);
 ```
+
+If you also want to request an email from the Twitter use, use `twitter.setAdditionalEmailRequest(true);`
+Make sure that your app has the 'Request email addresses from users' checkbox checked in the Twitter app permission settings.
+
+Note that it is still not guaranteed that you will get an email because the user might have signed up with a telephone number. So I would advise to use the `userId` for figuring out the user identity.
 
 Google Plus Connection
 --------

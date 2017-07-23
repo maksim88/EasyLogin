@@ -16,7 +16,7 @@ public abstract class SocialNetwork {
         FACEBOOK, GOOGLE_PLUS, TWITTER
     }
 
-    OnLoginCompleteListener mListener;
+    OnLoginCompleteListener listener;
 
     /**
      * Check if selected social network connected: true or false
@@ -27,7 +27,7 @@ public abstract class SocialNetwork {
     public abstract void requestLogin(OnLoginCompleteListener listener);
 
     public void setListener(OnLoginCompleteListener listener) {
-        mListener = listener;
+        this.listener = listener;
     }
 
     /**

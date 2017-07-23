@@ -2,6 +2,7 @@ package com.maksim88.easylogin.networks;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.maksim88.easylogin.AccessToken;
@@ -16,6 +17,7 @@ import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
 import java.lang.ref.WeakReference;
@@ -25,11 +27,13 @@ import java.lang.ref.WeakReference;
  */
 public class TwitterNetwork extends SocialNetwork {
 
-    private com.maksim88.easylogin.AccessToken mAccessToken;
+    private AccessToken accessToken;
 
-    private WeakReference<TwitterLoginButton> mLoginButton;
+    private WeakReference<TwitterLoginButton> loginButton;
 
-    private Callback<TwitterSession> mButtonCallback = new Callback<TwitterSession>() {
+    private boolean additionalEmailRequest;
+
+    private Callback<TwitterSession> buttonCallback = new Callback<TwitterSession>() {
 
         @Override
         public void success(Result<TwitterSession> result) {
@@ -37,19 +41,23 @@ public class TwitterNetwork extends SocialNetwork {
             TwitterAuthToken authToken = session.getAuthToken();
             String token = authToken.token;
             String secret = authToken.secret;
-            mAccessToken = new AccessToken.Builder(token)
+            AccessToken tempToken = new AccessToken.Builder(token)
                     .secret(secret)
                     .userName(session.getUserName())
                     .userId(String.valueOf(session.getUserId()))
                     .build();
-            mLoginButton.get().setEnabled(false);
-            mListener.onLoginSuccess(getNetwork());
+            if (additionalEmailRequest) {
+                requestEmail(session, tempToken);
+            } else {
+                accessToken = tempToken;
+                callLoginSuccess();
+            }
+
         }
 
         @Override
         public void failure(TwitterException e) {
-            mLoginButton.get().setEnabled(true);
-            mListener.onError(getNetwork(), e.getMessage());
+            callLoginFailure(e.getMessage());
         }
     };
 
@@ -77,9 +85,13 @@ public class TwitterNetwork extends SocialNetwork {
         requestLogin(button);
     }
 
+    public void setAdditionalEmailRequest(boolean additionalEmailRequest) {
+        this.additionalEmailRequest = additionalEmailRequest;
+    }
+
     private void requestLogin(TwitterLoginButton button) {
-        mLoginButton = new WeakReference<>(button);
-        mLoginButton.get().setCallback(mButtonCallback);
+        loginButton = new WeakReference<>(button);
+        loginButton.get().setCallback(buttonCallback);
     }
 
 
@@ -88,13 +100,13 @@ public class TwitterNetwork extends SocialNetwork {
         TwitterSession twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         if (twitterSession != null) {
             TwitterCore.getInstance().getSessionManager().clearActiveSession();
-            mLoginButton.get().setEnabled(true);
+            loginButton.get().setEnabled(true);
         }
     }
 
     @Override
     public com.maksim88.easylogin.AccessToken getAccessToken() {
-        return mAccessToken;
+        return accessToken;
     }
 
     @Override
@@ -104,8 +116,41 @@ public class TwitterNetwork extends SocialNetwork {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (mLoginButton != null && mLoginButton.get() != null) {
-            mLoginButton.get().onActivityResult(requestCode, resultCode, data);
+        if (loginButton != null && loginButton.get() != null) {
+            loginButton.get().onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    private void callLoginSuccess() {
+        loginButton.get().setEnabled(false);
+        listener.onLoginSuccess(getNetwork());
+    }
+
+    private void callLoginFailure(final String errorMessage) {
+        loginButton.get().setEnabled(true);
+        listener.onError(getNetwork(), errorMessage);
+    }
+
+    private void requestEmail(final TwitterSession session, final AccessToken tempToken) {
+        TwitterAuthClient authClient = new TwitterAuthClient();
+        authClient.requestEmail(session, new Callback<String>() {
+            @Override
+            public void success(Result<String> result) {
+                final String email = result.data;
+                if (TextUtils.isEmpty(email)) {
+                    logout();
+                    callLoginFailure("Before fetching an email, ensure that 'Request email addresses from users' is checked for your Twitter app.");
+                    return;
+                }
+                accessToken = new AccessToken.Builder(tempToken).email(email).build();
+                callLoginSuccess();
+            }
+
+            @Override
+            public void failure(TwitterException exception) {
+                Log.e("TwitterNetwork", "Before fetching an email, ensure that 'Request email addresses from users' is checked for your Twitter app.");
+                callLoginFailure(exception.getMessage());
+            }
+        });
     }
 }

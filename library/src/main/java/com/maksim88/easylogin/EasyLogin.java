@@ -15,37 +15,37 @@ import java.util.Map;
  */
 public class EasyLogin {
 
-    private static EasyLogin mInstance = null;
+    private static EasyLogin instance = null;
 
-    private Map<SocialNetwork.Network, SocialNetwork> mSocialNetworksMap = new HashMap<>();
+    private Map<SocialNetwork.Network, SocialNetwork> socialNetworksMap = new HashMap<>();
 
     private EasyLogin() {
     }
 
     public static void initialize() {
-        if (mInstance == null) {
-            mInstance = new EasyLogin();
+        if (instance == null) {
+            instance = new EasyLogin();
         }
     }
 
     public static EasyLogin getInstance() {
-        return mInstance;
+        return instance;
     }
 
 
     public void addSocialNetwork(SocialNetwork socialNetwork) {
-        if (mSocialNetworksMap.get(socialNetwork.getNetwork()) != null) {
+        if (socialNetworksMap.get(socialNetwork.getNetwork()) != null) {
             throw new RuntimeException("Social network with id = " + socialNetwork.getNetwork() + " already exists");
         }
 
-        mSocialNetworksMap.put(socialNetwork.getNetwork(), socialNetwork);
+        socialNetworksMap.put(socialNetwork.getNetwork(), socialNetwork);
     }
 
     public SocialNetwork getSocialNetwork(SocialNetwork.Network network) throws RuntimeException {
-        if (!mSocialNetworksMap.containsKey(network)) {
+        if (!socialNetworksMap.containsKey(network)) {
             throw new RuntimeException("Social network " + network + " not found");
         }
-        return mSocialNetworksMap.get(network);
+        return socialNetworksMap.get(network);
     }
 
     /**
@@ -53,11 +53,11 @@ public class EasyLogin {
      * @return list of initialized social networks
      */
     public List<SocialNetwork> getInitializedSocialNetworks() {
-        return Collections.unmodifiableList(new ArrayList<>(mSocialNetworksMap.values()));
+        return Collections.unmodifiableList(new ArrayList<>(socialNetworksMap.values()));
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        for (SocialNetwork network : mSocialNetworksMap.values()) {
+        for (SocialNetwork network : socialNetworksMap.values()) {
             network.onActivityResult(requestCode, resultCode, data);
         }
     }

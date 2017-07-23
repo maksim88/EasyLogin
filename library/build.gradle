@@ -6,7 +6,7 @@ publish {
     userOrg = 'maksim88'
     groupId = 'com.maksim88'
     artifactId = 'EasyLogin'
-    publishVersion = 'v0.5'
+    publishVersion = 'v0.6'
     website = 'https://github.com/maksim88/EasyLogin'
 }
 
@@ -38,8 +38,11 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.facebook.android:facebook-android-sdk:4.23.0'
+    // https://developers.facebook.com/docs/android/change-log-4x
+    compile 'com.facebook.android:facebook-android-sdk:4.24.0'
+    // https://developers.google.com/android/guides/releases
     compile 'com.google.android.gms:play-services-auth:10.2.6'
+    // https://dev.twitter.com/twitterkit/android/changelog
     compile('com.twitter.sdk.android:twitter-core:3.0.0@aar') {
         transitive = true;
     }
