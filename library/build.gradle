@@ -5,6 +5,7 @@ apply plugin: 'com.novoda.bintray-release'
 publish {
     userOrg = 'maksim88'
     groupId = 'com.maksim88'
+    repoName = 'EasyLogin'
     artifactId = 'EasyLogin'
     publishVersion = 'v0.6'
     website = 'https://github.com/maksim88/EasyLogin'
