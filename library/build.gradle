@@ -12,12 +12,12 @@ publish {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -36,16 +36,16 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    testImplementation 'junit:junit:4.12'
     // https://developers.facebook.com/docs/android/change-log-4x
-    compile 'com.facebook.android:facebook-android-sdk:4.24.0'
+    implementation 'com.facebook.android:facebook-login:4.28.0'
+    //implementation 'com.facebook.android:facebook-android-sdk:4.27.0'
     // https://developers.google.com/android/guides/releases
-    compile 'com.google.android.gms:play-services-auth:10.2.6'
+    implementation 'com.google.android.gms:play-services-auth:11.6.0'
     // https://dev.twitter.com/twitterkit/android/changelog
-    compile('com.twitter.sdk.android:twitter-core:3.0.0@aar') {
-        transitive = true;
+    implementation('com.twitter.sdk.android:twitter-core:3.1.1@aar') {
+        transitive = true
     }
 }
 
