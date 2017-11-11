@@ -7,7 +7,7 @@ publish {
     groupId = 'com.maksim88'
     repoName = 'EasyLogin'
     artifactId = 'EasyLogin'
-    publishVersion = 'v0.6'
+    publishVersion = 'v0.7'
     website = 'https://github.com/maksim88/EasyLogin'
 }
 
@@ -39,12 +39,11 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
     // https://developers.facebook.com/docs/android/change-log-4x
-    implementation 'com.facebook.android:facebook-login:4.28.0'
-    //implementation 'com.facebook.android:facebook-android-sdk:4.27.0'
+    api 'com.facebook.android:facebook-login:4.28.0'
     // https://developers.google.com/android/guides/releases
-    implementation 'com.google.android.gms:play-services-auth:11.6.0'
+    api 'com.google.android.gms:play-services-auth:11.6.0'
     // https://dev.twitter.com/twitterkit/android/changelog
-    implementation('com.twitter.sdk.android:twitter-core:3.1.1@aar') {
+    api('com.twitter.sdk.android:twitter-core:3.1.1@aar') {
         transitive = true
     }
 }

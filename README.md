@@ -138,7 +138,7 @@ After that you can easily include the library in your app `build.gradle`:
 
 ```groovy
 dependencies {
-	        api 'com.maksim88:EasyLogin:{latest-version}'
+	        implementation 'com.maksim88:EasyLogin:{latest-version}'
 	}
 ```
 
